@@ -31,7 +31,8 @@ COMMENT = "#"[^\n]*
 IDENTIFIER = [a-zA-Z][a-zA-Z0-9_\-]*
 NUMBER = [0-9]+
 TEXT = [^\s{\}(\)\[\]<\>\|\#\'\`\-\+\?\@][^\s{\}(\)\[\]<\>]*
-SYMBOL = [\-\+\~\?\<\>\@]
+SYMBOL = [\-\+\~\?\<\>]
+AT = @
 
 // Heredoc patterns
 HEREDOC_START = "<<"[a-zA-Z0-9_\-]+
@@ -149,6 +150,7 @@ public String processHeredocContent(String text) {
 {IDENTIFIER}                                 { return CaddyTypes.IDENTIFIER; }
 {NUMBER}                                     { return CaddyTypes.NUMBER; }
 {SYMBOL}                                     { return CaddyTypes.SYMBOL; }
+{AT}{TEXT}                                   { return CaddyTypes.MATCHER; }
 {TEXT}|{QUOTTED_STRING}|{BACKTICK_STRING}    { return CaddyTypes.TEXT; }
 
 // Whitespace and comments

@@ -16,6 +16,7 @@ class CaddySyntaxHighlighter : SyntaxHighlighterBase() {
         CaddyTypes.NUMBER -> NUMBER_KEYS
 //        CaddyTypes.TEXT -> TEXT_KEYS
         CaddyTypes.COMMENT -> COMMENT_KEYS
+        CaddyTypes.MATCHER -> MATCHER_KEYS
         CaddyTypes.HEREDOC_START, CaddyTypes.HEREDOC_END -> HEREDOC_MARKER_KEYS
         CaddyTypes.HEREDOC_CONTENT -> HEREDOC_CONTENT_KEYS
         TokenType.BAD_CHARACTER -> BAD_CHAR_KEYS
@@ -29,6 +30,9 @@ class CaddySyntaxHighlighter : SyntaxHighlighterBase() {
 
         private val COMMENT_KEYS = arrayOf(
             DefaultLanguageHighlighterColors.DOC_COMMENT
+        )
+        private val MATCHER_KEYS = arrayOf(
+            DefaultLanguageHighlighterColors.FUNCTION_DECLARATION
         )
         private val TEXT_KEYS = arrayOf(
             DefaultLanguageHighlighterColors.STRING

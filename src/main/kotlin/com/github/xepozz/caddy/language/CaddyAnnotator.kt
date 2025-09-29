@@ -1,7 +1,7 @@
 package com.github.xepozz.caddy.language
 
 import com.github.xepozz.caddy.language.psi.CaddyArgument
-import com.github.xepozz.caddy.language.psi.CaddyNamedBlock
+import com.github.xepozz.caddy.language.psi.CaddyBlock
 import com.github.xepozz.caddy.language.psi.impl.CaddyDirectiveImpl
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
@@ -42,11 +42,13 @@ class CaddyAnnotator : Annotator {
                 }
             }
 
-            is CaddyNamedBlock -> {
+            is CaddyBlock -> {
+                element.blockName?.apply {
                     holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element.blockName)
+                        .range(this)
                         .textAttributes(BLOCK_NAME_HIGHLIGHT)
                         .create()
+                    }
             }
         }
     }

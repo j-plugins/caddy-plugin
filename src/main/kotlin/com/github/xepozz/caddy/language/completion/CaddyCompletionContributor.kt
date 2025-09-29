@@ -4,7 +4,6 @@ import com.github.xepozz.caddy.DirectivesDictionary
 import com.github.xepozz.caddy.language.CaddyFile
 import com.github.xepozz.caddy.language.psi.CaddyBlock
 import com.github.xepozz.caddy.language.psi.CaddyDirective
-import com.github.xepozz.caddy.language.psi.CaddyInstruction
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
@@ -19,11 +18,8 @@ class CaddyCompletionContributor : CompletionContributor() {
                 .withParent(
                     PlatformPatterns.psiElement(CaddyDirective::class.java)
                         .withParent(
-                            PlatformPatterns.psiElement(CaddyInstruction::class.java)
-                                .withParent(
-                                    PlatformPatterns.psiElement(CaddyBlock::class.java)
-                                        .withAncestor(2, PlatformPatterns.psiElement(CaddyFile::class.java))
-                                )
+                            PlatformPatterns.psiElement(CaddyBlock::class.java)
+                                .withAncestor(2, PlatformPatterns.psiElement(CaddyFile::class.java))
                         )
                 ),
             DirectiveCompletionProvider()

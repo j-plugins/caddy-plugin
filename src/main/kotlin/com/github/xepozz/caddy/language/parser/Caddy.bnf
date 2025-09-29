@@ -52,7 +52,15 @@ private block_recover ::= !(COMMENT | IDENTIFIER | SYMBOL | RBRACE | EOL)
 
 private instructions ::= (instruction? EOL)*
 
-instruction ::= directive | COMMENT
+private instruction ::= matcher_definition | directive | COMMENT
+
+matcher_definition ::= MATCHER argument* block?
+{
+  pin=1
+  recoverWhile=directive_recover
+  implements=["com.intellij.psi.NavigatablePsiElement" "com.intellij.psi.PsiNamedElement"]
+  extends="com.github.xepozz.caddy.language.psi.impl.CaddyMatcherDefinitionBaseImpl"
+}
 
 directive ::= modifier? IDENTIFIER argument* block?
 {
@@ -61,11 +69,13 @@ directive ::= modifier? IDENTIFIER argument* block?
   implements=["com.intellij.psi.NavigatablePsiElement" "com.intellij.psi.PsiNamedElement"]
   extends="com.github.xepozz.caddy.language.psi.impl.CaddyDirectiveBaseImpl"
 }
-private directive_recover ::= !(COMMENT | IDENTIFIER | TEXT | SYMBOL | EOL)
+private directive_recover ::= !(COMMENT | IDENTIFIER | TEXT | SYMBOL | AT | EOL)
 
 modifier ::= SYMBOL
 
-argument ::= simple_value | env_value | heredoc
+argument ::= named_matcher | simple_value | env_value | heredoc
+
+named_matcher ::= MATCHER
 
 simple_value ::= SYMBOL | TEXT | NUMBER | IDENTIFIER
 
