@@ -12,8 +12,8 @@
         <fileType
                 name="Caddyfile"
                 implementationClass="com.github.xepozz.caddy.language.CaddyFileType"
-                extensions=""
                 language="Caddyfile"
+                extensions=""
                 fileNames="Caddyfile"
                 patterns="*.Caddyfile;Caddyfile.*"
         />
@@ -51,5 +51,8 @@
 
         <multiHostInjector
                 implementation="com.github.xepozz.caddy.language.injection.CaddyHeredocLanguageInjector"/>
+        <lang.formatter
+                language="Caddyfile"
+                implementationClass="com.github.xepozz.caddy.language.codeStyle.CaddyfileFormattingModelBuilder"/>
     </extensions>
 </idea-plugin>
