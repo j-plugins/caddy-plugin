@@ -40,12 +40,8 @@ class CaddyfileBlock(
     }
 
     override fun getIndent() = when (this.node.elementType) {
-        CaddyTypes.LBRACE,
-        CaddyTypes.RBRACE,
-        CaddyTypes.LBRACKET,
-        CaddyTypes.BLOCK_NAME,
-        CaddyTypes.RBRACKET -> Indent.getIndent(Indent.Type.OUTDENT_NORMAL, true, true)
-        CaddyTypes.BLOCK -> Indent.getIndent(Indent.Type.NORMAL, true, true)
+        CaddyTypes.DIRECTIVE,
+        CaddyTypes.MATCHER_DEFINITION -> Indent.getIndent(Indent.Type.NORMAL, true, true)
 
         else -> Indent.getNoneIndent()
     }
