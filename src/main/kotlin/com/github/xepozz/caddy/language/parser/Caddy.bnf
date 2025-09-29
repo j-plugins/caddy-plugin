@@ -33,9 +33,7 @@
 // Top level structure
 caddyFile ::= item_*
 
-private item_ ::= named_block | block | COMMENT | EOL
-
-named_block ::= block_name block
+private item_ ::= block | COMMENT | EOL
 
 block_name ::= (LPAREN address RPAREN) | address+
 address ::= IDENTIFIER | TEXT
@@ -45,9 +43,9 @@ address ::= IDENTIFIER | TEXT
   methods=[getValue getReferences]
 }
 
-block ::= LBRACE EOL instructions RBRACE
+block ::= block_name? LBRACE EOL instructions RBRACE
 {
-  pin=2
+  pin=3
   recoverWhile=block_recover
 }
 private block_recover ::= !(COMMENT | IDENTIFIER | SYMBOL | RBRACE | EOL)
