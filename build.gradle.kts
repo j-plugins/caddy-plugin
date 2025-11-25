@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
-    alias(libs.plugins.grammarkit) // Gradle Grammar-Kit Plugin
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -132,26 +131,6 @@ kover {
 }
 
 tasks {
-    withType<KotlinCompile> {
-        dependsOn(generateParser)
-    }
-
-    generateLexer {
-        sourceFile.set(file("src/main/kotlin/com/github/xepozz/caddy/language/parser/Caddy.flex"))
-        targetOutputDir.set(file("src/main/gen/com/github/xepozz/caddy/language/parser"))
-        purgeOldFiles.set(true)
-    }
-
-    generateParser {
-        dependsOn(generateLexer)
-
-        sourceFile.set(file("src/main/kotlin/com/github/xepozz/caddy/language/parser/Caddy.bnf"))
-        targetRootOutputDir.set(file("src/main/gen"))
-        pathToParser.set("/com/github/xepozz/caddy/language/parser/CaddyParser")
-        pathToPsiRoot.set("/com/github/xepozz/caddy/language/psi")
-        purgeOldFiles.set(true)
-    }
-
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
