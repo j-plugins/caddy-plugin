@@ -134,29 +134,29 @@ public String processHeredocContent(String text) {
 %%
 
 <YYINITIAL, IN_BLOCK> {
-{LBRACE}                                     { yypushState(IN_BLOCK); return CaddyTypes.LBRACE; }
-{RBRACE}                                     { yypopState(); return CaddyTypes.RBRACE; }
+    {LBRACE}                                     { yypushState(IN_BLOCK); return CaddyTypes.LBRACE; }
+    {RBRACE}                                     { yypopState(); return CaddyTypes.RBRACE; }
 
-// Special symbols
-{LPAREN}                                     { return CaddyTypes.LPAREN; }
-{RPAREN}                                     { return CaddyTypes.RPAREN; }
-{LBRACKET}                                   { return CaddyTypes.LBRACKET; }
-{RBRACKET}                                   { return CaddyTypes.RBRACKET; }
+    // Special symbols
+    {LPAREN}                                     { return CaddyTypes.LPAREN; }
+    {RPAREN}                                     { return CaddyTypes.RPAREN; }
+    {LBRACKET}                                   { return CaddyTypes.LBRACKET; }
+    {RBRACKET}                                   { return CaddyTypes.RBRACKET; }
 
-// Heredoc start
-{HEREDOC_START}{NEWLINE}                     { startHeredoc(); return CaddyTypes.HEREDOC_START; }
+    // Heredoc start
+    {HEREDOC_START}{NEWLINE}                     { startHeredoc(); return CaddyTypes.HEREDOC_START; }
 
-// Common elements
-{IDENTIFIER}                                 { return CaddyTypes.IDENTIFIER; }
-{NUMBER}                                     { return CaddyTypes.NUMBER; }
-{SYMBOL}                                     { return CaddyTypes.SYMBOL; }
-{AT}{TEXT}                                   { return CaddyTypes.MATCHER; }
-{TEXT}|{QUOTTED_STRING}|{BACKTICK_STRING}    { return CaddyTypes.TEXT; }
+    // Common elements
+    {IDENTIFIER}                                 { return CaddyTypes.IDENTIFIER; }
+    {NUMBER}                                     { return CaddyTypes.NUMBER; }
+    {SYMBOL}                                     { return CaddyTypes.SYMBOL; }
+    {AT}{TEXT}                                   { return CaddyTypes.MATCHER; }
+    {TEXT}|{QUOTTED_STRING}|{BACKTICK_STRING}    { return CaddyTypes.TEXT; }
 
-// Whitespace and comments
-{WHITESPACE}                                 { return TokenType.WHITE_SPACE; }
-{NEWLINE}                                    { return CaddyTypes.EOL; }
-{COMMENT}                                    { return CaddyTypes.COMMENT; }
+    // Whitespace and comments
+    {WHITESPACE}                                 { return TokenType.WHITE_SPACE; }
+    {NEWLINE}                                    { return CaddyTypes.EOL; }
+    {COMMENT}                                    { return CaddyTypes.COMMENT; }
 }
 
 <IN_HEREDOC> {
