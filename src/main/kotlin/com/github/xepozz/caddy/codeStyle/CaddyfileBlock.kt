@@ -1,7 +1,5 @@
-package com.github.xepozz.caddy.language.codeStyle
+package com.github.xepozz.caddy.codeStyle
 
-import com.github.xepozz.caddy.language.parser.CaddyParserDefinition
-import com.github.xepozz.caddy.language.psi.CaddyTokenSets
 import com.github.xepozz.caddy.language.psi.CaddyTypes
 import com.intellij.formatting.Alignment
 import com.intellij.formatting.Block

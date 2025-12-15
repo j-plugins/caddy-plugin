@@ -1,4 +1,4 @@
-package com.github.xepozz.caddy.language.documentation
+package com.github.xepozz.caddy.documentation
 
 data class CaddyDirectiveDoc(
     val name: String,

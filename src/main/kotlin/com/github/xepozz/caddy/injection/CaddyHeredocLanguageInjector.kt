@@ -1,4 +1,4 @@
-package com.github.xepozz.caddy.language.injection
+package com.github.xepozz.caddy.injection
 
 import com.github.xepozz.caddy.language.psi.CaddyHeredoc
 import com.github.xepozz.caddy.language.psi.CaddyTypes

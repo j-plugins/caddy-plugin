@@ -39,7 +39,7 @@
 
         <lang.documentationProvider
                 language="Caddyfile"
-                implementationClass="com.github.xepozz.caddy.language.documentation.CaddyDocumentationProvider"/>
+                implementationClass="com.github.xepozz.caddy.documentation.CaddyDocumentationProvider"/>
 
         <lang.foldingBuilder
                 language="Caddyfile"
@@ -47,12 +47,12 @@
 
         <completion.contributor
                 language="Caddyfile"
-                implementationClass="com.github.xepozz.caddy.language.completion.CaddyCompletionContributor"/>
+                implementationClass="com.github.xepozz.caddy.completion.CaddyCompletionContributor"/>
 
         <multiHostInjector
-                implementation="com.github.xepozz.caddy.language.injection.CaddyHeredocLanguageInjector"/>
+                implementation="com.github.xepozz.caddy.injection.CaddyHeredocLanguageInjector"/>
         <lang.formatter
                 language="Caddyfile"
-                implementationClass="com.github.xepozz.caddy.language.codeStyle.CaddyfileFormattingModelBuilder"/>
+                implementationClass="com.github.xepozz.caddy.codeStyle.CaddyfileFormattingModelBuilder"/>
     </extensions>
 </idea-plugin>

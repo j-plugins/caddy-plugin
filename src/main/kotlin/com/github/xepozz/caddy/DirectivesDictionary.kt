@@ -1,6 +1,6 @@
 package com.github.xepozz.caddy
 
-import com.github.xepozz.caddy.language.documentation.CaddyDirectiveDoc
+import com.github.xepozz.caddy.documentation.CaddyDirectiveDoc
 
 object DirectivesDictionary {
     val directives = mapOf(

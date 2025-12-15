@@ -1,7 +1,5 @@
-package com.github.xepozz.caddy.language.codeStyle
+package com.github.xepozz.caddy.codeStyle
 
-import com.github.xepozz.caddy.language.CaddyFile
-import com.github.xepozz.caddy.language.CaddyFileType
 import com.github.xepozz.caddy.language.CaddyLanguage
 import com.github.xepozz.caddy.language.parser.CaddyParserDefinition
 import com.github.xepozz.caddy.language.psi.CaddyTypes

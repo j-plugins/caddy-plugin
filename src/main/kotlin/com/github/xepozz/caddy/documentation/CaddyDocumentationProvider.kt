@@ -1,4 +1,4 @@
-package com.github.xepozz.caddy.language.documentation
+package com.github.xepozz.caddy.documentation
 
 import com.github.xepozz.caddy.DirectivesDictionary
 import com.github.xepozz.caddy.language.psi.CaddyDirective
