@@ -48,7 +48,7 @@ block ::= block_name? LBRACE EOL instructions RBRACE
   pin=3
   recoverWhile=block_recover
 }
-private block_recover ::= !(COMMENT | IDENTIFIER | SYMBOL | RBRACE | EOL)
+private block_recover ::= !(COMMENT | SYMBOL | RBRACE | EOL)
 
 private instructions ::= (instruction? EOL)*
 
@@ -89,7 +89,7 @@ heredoc ::= HEREDOC_START HEREDOC_CONTENT* HEREDOC_END
   pin=1
   implements=["com.intellij.psi.PsiLanguageInjectionHost" "com.intellij.psi.PsiLiteralValue"]
   extends="com.github.xepozz.caddy.language.psi.impl.CaddyHeredocContentImpl"
-  methods=[isValidHost updateText createLiteralTextEscaper]
+  methods=[]
 }
 
 //private instruction_recover ::= !(TEXT | RBRACE)
