@@ -54,7 +54,7 @@ jobs:
           ./gradlew publishPlugin
 
       - name: Commit and push changes
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           add: 'gradle.properties'
           author_name: GitHub Actions
