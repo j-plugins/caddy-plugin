@@ -105,6 +105,61 @@ class CaddyFormatterTest : BasePlatformTestCase() {
         )
     }
 
+    // Pressing Enter on the line that opens a site block should drop the
+    // cursor onto a new line indented at the directive level, not at column 0.
+    fun testEnterAfterOpeningBraceIndents() {
+        myFixture.configureByText(
+            "test.Caddyfile",
+            """
+                example.com {<caret>
+                    reverse_proxy backend:8080
+                }
+            """.trimIndent(),
+        )
+        myFixture.type('\n')
+        val text = myFixture.editor.document.text
+        val caretOffset = myFixture.editor.caretModel.offset
+        // The line that contains the caret must start with at least one space
+        // — i.e. IntelliJ asked our formatter where to put the new line and
+        // got "indent normally", not "indent to column 0".
+        val lineStart = text.lastIndexOf('\n', caretOffset - 1) + 1
+        val newLine = text.substring(lineStart, caretOffset)
+        assertEquals(
+            "Enter inside a site block must indent the new line by 4 spaces, " +
+                "got '${newLine.replace(" ", "·")}' (full text:\n$text\n)",
+            "    ",
+            newLine,
+        )
+    }
+
+    // Issue: argument tokens that are CONTIGUOUS in source (no whitespace
+    // between them) must remain contiguous after formatting. `{path}/` is
+    // tokenised as env_value + simple_value, but Caddy itself treats it as
+    // a single argument — inserting a space breaks `try_files` patterns and
+    // every other directive that concatenates a placeholder with literal text.
+    fun testContiguousArgumentsKeepNoSpace() {
+        val source = """
+            example.com {
+                try_files @phpRewrite {path} {path}/ /index.php?{query}
+            }
+        """.trimIndent()
+
+        val formatted = reformat(source)
+        assertTrue(
+            "`{path}/` must stay contiguous (no space inserted around `}`).\n" +
+                "Formatted:\n$formatted",
+            formatted.contains("{path}/ "),
+        )
+        assertFalse(
+            "Must not insert space between `}` and `/`.\nFormatted:\n$formatted",
+            formatted.contains("{path} /"),
+        )
+        assertFalse(
+            "Must not insert space between `path` and `}`.\nFormatted:\n$formatted",
+            formatted.contains("{path }"),
+        )
+    }
+
     // Issue #61: nested directives should not accumulate indentation per nesting level.
     fun testNestedBlockIndentationDoesNotAccumulate() {
         val source = """
