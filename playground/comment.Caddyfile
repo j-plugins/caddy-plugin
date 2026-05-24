@@ -1,0 +1,5 @@
+
+example.com:443 {
+    # Application Root
+    root * /var/www/pterodactyl/
+}
