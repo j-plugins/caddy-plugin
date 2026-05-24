@@ -1,24 +1,26 @@
 ##
- ## test
+## test
 ##
- ## test
+## test
+##
+##
 ##
 
 
 {
     a
-	frankenphp {
-		worker ./public/index.php#fff
-	}
+    frankenphp {
+                   worker ./public/index.php#fff
+               }
 
-	root public/
+    root public/
 }
 
 (logging) {
-	log {
-		output file /var/log/caddy.log
-		format json
-	}
+    log {
+            output file /var/log/caddy.log
+            format json
+        }
 }
 
 #example.com {
@@ -31,27 +33,37 @@
 #}
 
 localhost {
-	log
+    log
 
-	encode zstd br gzip
-	root public/
+    @fonts {
+       my \.(woff?|ttf)
+   }
+    encode zstd br gzip
+    root public/
 
-	request_header X-Sendfile-Type x-accel-redirect
-	request_header X-Accel-Mapping ../private-files=/private-files
+    request_header X-Sendfile-Type x-accel-redirect
+    request_header X-Accel-Mapping ../private-files=/private-files
 
-	intercept {
-		@sendfile header X-Accel-Redirect *
-		handle_response @sendfile {
-			root private-files/
-			rewrite * {resp.header.X-Accel-Redirect}
-			method * GET
-			header -X-Accel-Redirect
-			file_server
-		}
-	}
+    intercept {
+                  @sendfile header X-Accel-Redirect *
+                  handle_response @sendfile {
+                                                root private-files/
+                                                rewrite * {resp.header.X-Accel-Redirect}
+                                                method * GET
+                                                header - X-Accel-Redirect
+                                                file_server
+                                            }
+              }
 
-	php_server {
-		try_files {path} index.php
-	}
+    php_server {
+                   try_files {path} index.php
+               }
+
+    @magic vars_regexp magic {magic_number} ^(4.*)
+
+    @apiversion {
+                    path_regexp ^/api/[1-9]\\d*/.*$
+                }
+    reverse_proxy @apiversion relay:3000
 
 }

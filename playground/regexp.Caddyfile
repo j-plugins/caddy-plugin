@@ -2,4 +2,6 @@ example.com {
     @sendfile header X-Accel-Redirect *
     handle_response @se
     reverse_proxy {$UPSTREAMS}
-} 
+    @static path_regexp static
+    @static path_regexp static \.([a-f0-9]{6})\.(css|js)$
+}
