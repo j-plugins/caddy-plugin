@@ -1,0 +1,82 @@
+package com.github.xepozz.caddy
+
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.psi.codeStyle.CodeStyleManager
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
+
+class CaddyFormatterTest : BasePlatformTestCase() {
+
+    private fun reformat(source: String): String {
+        val file = myFixture.configureByText("test.Caddyfile", source)
+        WriteCommandAction.runWriteCommandAction(project) {
+            CodeStyleManager.getInstance(project).reformat(file)
+        }
+        return file.text
+    }
+
+    fun testFormattedNestedSiteBlockMatchesExpected() {
+        val source = """
+            example.com {
+            reverse_proxy /api/* backend:8080
+            log {
+            output file /var/log/caddy.log
+            }
+            }
+        """.trimIndent()
+
+        val actual = reformat(source)
+        println("--- ACTUAL ---\n$actual\n--- END ---")
+
+        val lines = actual.lines()
+        val reverseProxyLine = lines.first { it.contains("reverse_proxy") }
+        val outputLine = lines.first { it.contains("output file") }
+
+        assertEquals("reverse_proxy should be indented 4 spaces", 4, reverseProxyLine.takeWhile { it == ' ' }.length)
+        assertEquals("output file should be indented 8 spaces", 8, outputLine.takeWhile { it == ' ' }.length)
+    }
+
+    // Issue #61: nested directives should not accumulate indentation per nesting level.
+    fun testNestedBlockIndentationDoesNotAccumulate() {
+        val source = """
+            {
+            log access-file {
+            output file /var/log/caddy/access.log {
+            roll_size 100MiB
+            roll_keep 2
+            }
+            }
+            }
+        """.trimIndent()
+
+        val formatted = reformat(source)
+
+        val lines = formatted.lines()
+        val rollSizeLine = lines.first { it.contains("roll_size") }
+        val outputLine = lines.first { it.contains("output file") }
+        val logLine = lines.first { it.contains("log access-file") }
+
+        val logIndent = logLine.takeWhile { it == ' ' }.length
+        val outputIndent = outputLine.takeWhile { it == ' ' }.length
+        val rollSizeIndent = rollSizeLine.takeWhile { it == ' ' }.length
+
+        // Expect a constant step (one level deeper per nested block), not accumulation
+        // that depends on the column where the opening brace appeared.
+        val firstStep = outputIndent - logIndent
+        val secondStep = rollSizeIndent - outputIndent
+
+        assertTrue(
+            "Indentation step should be > 0 (got $firstStep / $secondStep)\nFormatted:\n$formatted",
+            firstStep > 0 && secondStep > 0,
+        )
+        assertEquals(
+            "Each nesting level should add the same indent. Got $firstStep then $secondStep.\nFormatted:\n$formatted",
+            firstStep,
+            secondStep,
+        )
+        // Sanity bound: a 3-level Caddyfile should never reach the 20+ columns seen in issue #61.
+        assertTrue(
+            "rollSize indent should stay reasonable, got $rollSizeIndent.\nFormatted:\n$formatted",
+            rollSizeIndent <= 16,
+        )
+    }
+}

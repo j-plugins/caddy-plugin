@@ -1,5 +1,6 @@
 package com.github.xepozz.caddy.codeStyle
 
+import com.github.xepozz.caddy.language.parser.CaddyParserDefinition
 import com.github.xepozz.caddy.language.psi.CaddyTypes
 import com.intellij.formatting.Alignment
 import com.intellij.formatting.Block
@@ -21,17 +22,28 @@ class CaddyfileBlock(
         val skipTokens = setOf(TokenType.WHITE_SPACE, CaddyTypes.EOL)
     }
 
-    protected override fun buildChildren() = buildList {
-        var child = myNode.firstChildNode
+    // Issue #61: a BLOCK PSI node opens with `{` mid-line, so IntelliJ would
+    // anchor children's indent to that column. We flatten BLOCK children up
+    // into the surrounding formatter block so every nested directive gets a
+    // single NORMAL step instead of accumulating from the column of `{`.
+    protected override fun buildChildren() = buildList { appendChildren(myNode, this) }
+
+    private fun appendChildren(parent: ASTNode, target: MutableList<Block>) {
+        var child = parent.firstChildNode
         while (child != null) {
-            if (!skipTokens.contains(child.elementType)) {
-                val block = CaddyfileBlock(
-                    child,
-                    Wrap.createWrap(WrapType.NONE, false),
-                    Alignment.createAlignment(),
-                    spacingBuilder,
+            when {
+                skipTokens.contains(child.elementType) -> {}
+                child.elementType == CaddyTypes.BLOCK && parent.elementType != CaddyParserDefinition.FILE -> {
+                    appendChildren(child, target)
+                }
+                else -> target.add(
+                    CaddyfileBlock(
+                        child,
+                        Wrap.createWrap(WrapType.NONE, false),
+                        Alignment.createAlignment(),
+                        spacingBuilder,
+                    )
                 )
-                add(block)
             }
             child = child.treeNext
         }
@@ -39,7 +51,7 @@ class CaddyfileBlock(
 
     override fun getIndent() = when (this.node.elementType) {
         CaddyTypes.DIRECTIVE,
-        CaddyTypes.MATCHER_DEFINITION -> Indent.getIndent(Indent.Type.NORMAL, true, true)
+        CaddyTypes.MATCHER_DEFINITION -> Indent.getNormalIndent()
 
         else -> Indent.getNoneIndent()
     }

@@ -36,7 +36,7 @@ caddyFile ::= item_*
 private item_ ::= block | COMMENT | EOL
 
 block_name ::= (LPAREN address RPAREN) | address+
-address ::= IDENTIFIER | TEXT
+address ::= IDENTIFIER | TEXT | env_value
 {
   implements=["com.intellij.psi.NavigatablePsiElement" "com.intellij.psi.PsiLiteralValue"]
   extends="com.github.xepozz.caddy.language.psi.impl.CaddyAddressBaseImpl"
