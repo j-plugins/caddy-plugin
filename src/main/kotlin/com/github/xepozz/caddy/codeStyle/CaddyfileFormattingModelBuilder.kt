@@ -32,7 +32,9 @@ class CaddyfileFormattingModelBuilder : FormattingModelBuilder {
                 .spaces(1)
                 .before(CaddyTypes.ARGUMENT)
                 .spaces(1)
-                .aroundInside(CaddyTypes.BLOCK, CaddyParserDefinition.FILE)
+                // Blank line only BETWEEN consecutive top-level site blocks,
+                // not around the braces inside them.
+                .betweenInside(CaddyTypes.BLOCK, CaddyTypes.BLOCK, CaddyParserDefinition.FILE)
                 .blankLines(1)
     }
 }

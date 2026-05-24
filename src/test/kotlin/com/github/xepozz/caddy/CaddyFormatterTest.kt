@@ -14,27 +14,6 @@ class CaddyFormatterTest : BasePlatformTestCase() {
         return file.text
     }
 
-    fun testFormattedNestedSiteBlockMatchesExpected() {
-        val source = """
-            example.com {
-            reverse_proxy /api/* backend:8080
-            log {
-            output file /var/log/caddy.log
-            }
-            }
-        """.trimIndent()
-
-        val actual = reformat(source)
-        println("--- ACTUAL ---\n$actual\n--- END ---")
-
-        val lines = actual.lines()
-        val reverseProxyLine = lines.first { it.contains("reverse_proxy") }
-        val outputLine = lines.first { it.contains("output file") }
-
-        assertEquals("reverse_proxy should be indented 4 spaces", 4, reverseProxyLine.takeWhile { it == ' ' }.length)
-        assertEquals("output file should be indented 8 spaces", 8, outputLine.takeWhile { it == ' ' }.length)
-    }
-
     // Issue #61: nested directives should not accumulate indentation per nesting level.
     fun testNestedBlockIndentationDoesNotAccumulate() {
         val source = """
@@ -78,5 +57,26 @@ class CaddyFormatterTest : BasePlatformTestCase() {
             "rollSize indent should stay reasonable, got $rollSizeIndent.\nFormatted:\n$formatted",
             rollSizeIndent <= 16,
         )
+    }
+
+    // Issue #61: a real 2-level Caddyfile must get the expected 4-space step
+    // per nesting level — `reverse_proxy` at 4 spaces, `output file` at 8.
+    fun testTwoLevelIndentation() {
+        val source = """
+            example.com {
+            reverse_proxy /api/* backend:8080
+            log {
+            output file /var/log/caddy.log
+            }
+            }
+        """.trimIndent()
+
+        val formatted = reformat(source)
+        val lines = formatted.lines()
+        val reverseProxyLine = lines.first { it.contains("reverse_proxy") }
+        val outputLine = lines.first { it.contains("output file") }
+
+        assertEquals("reverse_proxy should be indented 4 spaces", 4, reverseProxyLine.takeWhile { it == ' ' }.length)
+        assertEquals("output file should be indented 8 spaces", 8, outputLine.takeWhile { it == ' ' }.length)
     }
 }

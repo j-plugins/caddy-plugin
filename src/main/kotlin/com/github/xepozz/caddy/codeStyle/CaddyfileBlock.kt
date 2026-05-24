@@ -52,11 +52,11 @@ class CaddyfileBlock(
     override fun getIndent() = when (this.node.elementType) {
         CaddyTypes.DIRECTIVE,
         CaddyTypes.MATCHER_DEFINITION -> Indent.getNormalIndent()
-
         else -> Indent.getNoneIndent()
     }
 
-    override fun getSpacing(child1: Block?, child2: Block) = spacingBuilder.getSpacing(this, child1, child2)
+    override fun getSpacing(child1: Block?, child2: Block) =
+        spacingBuilder.getSpacing(this, child1, child2)
 
     override fun isLeaf() = myNode.firstChildNode == null
 }
