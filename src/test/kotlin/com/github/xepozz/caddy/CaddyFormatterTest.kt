@@ -14,6 +14,76 @@ class CaddyFormatterTest : BasePlatformTestCase() {
         return file.text
     }
 
+    // Issue #61: a region wrapped in `# @formatter:off` / `# @formatter:on`
+    // must be left byte-identical by the formatter.
+    fun testFormatterOffIsRespected() {
+        val protected = """
+            # @formatter:off
+            {
+            log access-file {
+            output file /var/log/caddy/access.log {
+            roll_size 100MiB
+            }
+            }
+            }
+            # @formatter:on
+        """.trimIndent()
+
+        assertEquals(
+            "Content between @formatter:off and @formatter:on must be untouched.",
+            protected,
+            reformat(protected),
+        )
+
+        // Sanity check: without the tags, the same content WOULD be reformatted —
+        // otherwise the previous assertion is vacuous.
+        val unprotected = """
+            {
+            log access-file {
+            output file /var/log/caddy/access.log {
+            roll_size 100MiB
+            }
+            }
+            }
+        """.trimIndent()
+        assertTrue(
+            "Without @formatter:off, the formatter must change the input — " +
+                "otherwise the @formatter:off test proves nothing.",
+            unprotected != reformat(unprotected),
+        )
+    }
+
+    // Issue #61: `# @formatter:off` placed INSIDE a site block must also be honored.
+    fun testFormatterOffInsideBlock() {
+        // Deliberately-wrong indentation inside @formatter:off — single space, not 4.
+        // If the formatter respects @formatter:off, it must NOT correct it.
+        val source = """
+            example.com {
+                # @formatter:off
+             log access-file {
+             output file /var/log/caddy/access.log
+             }
+                # @formatter:on
+                reverse_proxy backend:8080
+            }
+        """.trimIndent()
+
+        val formatted = reformat(source)
+        assertTrue(
+            "The single-space indent inside @formatter:off must be preserved.\n" +
+                "Formatted:\n$formatted",
+            formatted.contains("\n log access-file {\n") &&
+                formatted.contains("\n output file ") &&
+                formatted.contains("\n }\n"),
+        )
+        // And the lines outside @formatter:off must still be reformatted properly.
+        assertTrue(
+            "reverse_proxy outside @formatter:off must be at 4 spaces indent.\n" +
+                "Formatted:\n$formatted",
+            formatted.contains("\n    reverse_proxy backend:8080\n"),
+        )
+    }
+
     // Issue #61: nested directives should not accumulate indentation per nesting level.
     fun testNestedBlockIndentationDoesNotAccumulate() {
         val source = """
