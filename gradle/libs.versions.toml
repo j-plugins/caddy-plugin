@@ -5,7 +5,9 @@ opentest4j = "1.3.0"
 
 # plugins
 changelog = "2.5.0"
+grammarKit = "2022.3.2.2"
 intelliJPlatform = "2.16.0"
+jflex = "1.9.2"
 kotlin = "2.3.0"
 kover = "0.9.8"
 qodana = "2026.1.0"
@@ -16,6 +18,7 @@ opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "ope
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
+grammarKit = { id = "org.jetbrains.grammarkit", version.ref = "grammarKit" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

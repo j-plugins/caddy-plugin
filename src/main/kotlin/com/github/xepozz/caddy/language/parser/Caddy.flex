@@ -30,7 +30,18 @@ COMMENT = "#"[^\n]*
 // Identifier patterns
 IDENTIFIER = [a-zA-Z][a-zA-Z0-9_\-]*
 NUMBER = [0-9]+
+// TEXT at top level (YYINITIAL) excludes parens so that snippet definitions
+// like `(name) { ... }` keep working.
 TEXT = [^\s{\}(\)\[\]<\>\|\#\'\`\-\+\?\@][^\s{\}(\)\[\]<\>]*
+// Inside a block, an argument may contain regex metacharacters like
+// `(`, `)`, `[`, `]`, `+`, `?`, `<`, `>` plus brace-quantifiers `{N}`
+// and `{N,M}` (issue #27). After the first character, balanced brace
+// pairs are absorbed so patterns like `[a-f0-9]{6}` and `(css|js)`
+// tokenise as a single TEXT. Standalone `{` and `}` still terminate
+// the token, so env-var substitutions like `{$VAR}` keep parsing as
+// `LBRACE TEXT RBRACE`. Leading `-`, `+`, `?`, `~` are still excluded
+// so they keep tokenising as the SYMBOL modifier prefix.
+TEXT_IN_BLOCK = [^\s{\}\#\'\`\@\-\+\?\~]([^\s{\}\#\'\`\@]|\{[^{}]*\})*
 SYMBOL = [\-\+\~\?\<\>]
 AT = @
 
@@ -137,9 +148,7 @@ public String processHeredocContent(String text) {
     {LBRACE}                                     { yypushState(IN_BLOCK); return CaddyTypes.LBRACE; }
     {RBRACE}                                     { yypopState(); return CaddyTypes.RBRACE; }
 
-    // Special symbols
-    {LPAREN}                                     { return CaddyTypes.LPAREN; }
-    {RPAREN}                                     { return CaddyTypes.RPAREN; }
+    // Square brackets
     {LBRACKET}                                   { return CaddyTypes.LBRACKET; }
     {RBRACKET}                                   { return CaddyTypes.RBRACKET; }
 
@@ -150,13 +159,26 @@ public String processHeredocContent(String text) {
     {IDENTIFIER}                                 { return CaddyTypes.IDENTIFIER; }
     {NUMBER}                                     { return CaddyTypes.NUMBER; }
     {SYMBOL}                                     { return CaddyTypes.SYMBOL; }
-    {AT}{TEXT}                                   { return CaddyTypes.MATCHER; }
-    {TEXT}|{QUOTTED_STRING}|{BACKTICK_STRING}    { return CaddyTypes.TEXT; }
 
     // Whitespace and comments
     {WHITESPACE}                                 { return TokenType.WHITE_SPACE; }
     {NEWLINE}                                    { return CaddyTypes.EOL; }
     {COMMENT}                                    { return CaddyTypes.COMMENT; }
+}
+
+<YYINITIAL> {
+    // At the top level, parens delimit snippet definitions: `(name) { ... }`.
+    {LPAREN}                                     { return CaddyTypes.LPAREN; }
+    {RPAREN}                                     { return CaddyTypes.RPAREN; }
+    {AT}{TEXT}                                   { return CaddyTypes.MATCHER; }
+    {TEXT}|{QUOTTED_STRING}|{BACKTICK_STRING}    { return CaddyTypes.TEXT; }
+}
+
+<IN_BLOCK> {
+    // Inside a block, parens are part of directive arguments (e.g. regex
+    // capture groups), so they're absorbed into TEXT.
+    {AT}{TEXT_IN_BLOCK}                          { return CaddyTypes.MATCHER; }
+    {TEXT_IN_BLOCK}|{QUOTTED_STRING}|{BACKTICK_STRING}  { return CaddyTypes.TEXT; }
 }
 
 <IN_HEREDOC> {

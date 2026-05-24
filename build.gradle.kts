@@ -1,5 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -7,6 +9,7 @@ plugins {
     id("java") // Java support
     alias(libs.plugins.kotlin) // Kotlin support
     alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
+    alias(libs.plugins.grammarKit) // Gradle Grammar-Kit Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
@@ -130,6 +133,24 @@ kover {
     }
 }
 
+grammarKit {
+    jflexRelease.set(libs.versions.jflex)
+}
+
+val generateCaddyLexer = tasks.register<GenerateLexerTask>("generateCaddyLexer") {
+    sourceFile.set(file("src/main/kotlin/com/github/xepozz/caddy/language/parser/Caddy.flex"))
+    targetOutputDir.set(file("src/main/gen/com/github/xepozz/caddy/language/parser"))
+    purgeOldFiles.set(true)
+}
+
+val generateCaddyParser = tasks.register<GenerateParserTask>("generateCaddyParser") {
+    sourceFile.set(file("src/main/kotlin/com/github/xepozz/caddy/language/parser/Caddy.bnf"))
+    targetRootOutputDir.set(file("src/main/gen"))
+    pathToParser.set("com/github/xepozz/caddy/language/parser/CaddyParser.java")
+    pathToPsiRoot.set("com/github/xepozz/caddy/language/psi")
+    purgeOldFiles.set(true)
+}
+
 tasks {
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
@@ -137,6 +158,14 @@ tasks {
 
     publishPlugin {
         dependsOn(patchChangelog)
+    }
+
+    compileKotlin {
+        dependsOn(generateCaddyLexer, generateCaddyParser)
+    }
+
+    compileJava {
+        dependsOn(generateCaddyLexer, generateCaddyParser)
     }
 }
 
