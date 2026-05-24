@@ -34,11 +34,14 @@ NUMBER = [0-9]+
 // like `(name) { ... }` keep working.
 TEXT = [^\s{\}(\)\[\]<\>\|\#\'\`\-\+\?\@][^\s{\}(\)\[\]<\>]*
 // Inside a block, an argument may contain regex metacharacters like
-// `(`, `)`, `[`, `]`, `+`, `?`, `<`, `>` (issue #27). Only whitespace,
-// braces, comments, quotes and the matcher `@` may terminate it.
-// Leading `-`, `+`, `?`, `~` are still excluded so they keep tokenising as
-// the SYMBOL modifier that prefixes a directive name.
-TEXT_IN_BLOCK = [^\s{\}\#\'\`\@\-\+\?\~][^\s{\}\#\'\`\@]*
+// `(`, `)`, `[`, `]`, `+`, `?`, `<`, `>` plus brace-quantifiers `{N}`
+// and `{N,M}` (issue #27). After the first character, balanced brace
+// pairs are absorbed so patterns like `[a-f0-9]{6}` and `(css|js)`
+// tokenise as a single TEXT. Standalone `{` and `}` still terminate
+// the token, so env-var substitutions like `{$VAR}` keep parsing as
+// `LBRACE TEXT RBRACE`. Leading `-`, `+`, `?`, `~` are still excluded
+// so they keep tokenising as the SYMBOL modifier prefix.
+TEXT_IN_BLOCK = [^\s{\}\#\'\`\@\-\+\?\~]([^\s{\}\#\'\`\@]|\{[^{}]*\})*
 SYMBOL = [\-\+\~\?\<\>]
 AT = @
 

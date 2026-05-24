@@ -84,6 +84,27 @@ class CaddyFormatterTest : BasePlatformTestCase() {
         )
     }
 
+    // Issue #61 follow-up: a comment INSIDE a site block must get the same
+    // indent as the surrounding directives — not slide back to column 0.
+    fun testCommentInsideBlockGetsIndented() {
+        val source = """
+            example.com:443 {
+                # Application Root
+                root * /var/www/pterodactyl/
+            }
+        """.trimIndent()
+
+        val formatted = reformat(source)
+        val lines = formatted.lines()
+        val commentLine = lines.first { it.contains("# Application Root") }
+        val rootLine = lines.first { it.contains("root *") }
+        assertEquals(
+            "Comment must keep the same indent as the sibling directive.\nFormatted:\n$formatted",
+            rootLine.takeWhile { it == ' ' }.length,
+            commentLine.takeWhile { it == ' ' }.length,
+        )
+    }
+
     // Issue #61: nested directives should not accumulate indentation per nesting level.
     fun testNestedBlockIndentationDoesNotAccumulate() {
         val source = """

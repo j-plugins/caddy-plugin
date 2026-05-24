@@ -49,9 +49,13 @@ class CaddyfileBlock(
         }
     }
 
-    override fun getIndent() = when (this.node.elementType) {
-        CaddyTypes.DIRECTIVE,
-        CaddyTypes.MATCHER_DEFINITION -> Indent.getNormalIndent()
+    override fun getIndent() = when {
+        myNode.elementType == CaddyTypes.DIRECTIVE ||
+            myNode.elementType == CaddyTypes.MATCHER_DEFINITION -> Indent.getNormalIndent()
+        // A bare COMMENT lives at FILE level (top-of-file note) OR inside a
+        // BLOCK (commenting a directive). Only the latter needs indenting.
+        myNode.elementType == CaddyTypes.COMMENT &&
+            myNode.treeParent?.elementType == CaddyTypes.BLOCK -> Indent.getNormalIndent()
         else -> Indent.getNoneIndent()
     }
 

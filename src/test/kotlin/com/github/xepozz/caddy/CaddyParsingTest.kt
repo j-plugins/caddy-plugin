@@ -67,6 +67,17 @@ class CaddyParsingTest : BasePlatformTestCase() {
         )
     }
 
+    // Issue #27 follow-up: regex with brace quantifiers `{N}` and alternation `|`.
+    fun testRegexWithBraceQuantifierAndAlternation() {
+        assertNoErrors(
+            """
+            example.com {
+                @static path_regexp static \.([a-f0-9]{6})\.(css|js)${'$'}
+            }
+            """.trimIndent()
+        )
+    }
+
     // Regression: snippet definitions `(name) { ... }` must still parse at the top level.
     fun testSnippetDefinitionStillParses() {
         assertNoErrors(
