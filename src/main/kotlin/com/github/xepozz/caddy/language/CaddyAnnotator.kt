@@ -2,7 +2,9 @@ package com.github.xepozz.caddy.language
 
 import com.github.xepozz.caddy.language.psi.CaddyArgument
 import com.github.xepozz.caddy.language.psi.CaddyBlock
-import com.github.xepozz.caddy.language.psi.impl.CaddyDirectiveImpl
+import com.github.xepozz.caddy.language.psi.CaddyDirective
+import com.github.xepozz.caddy.language.psi.CaddyMatcherDefinition
+import com.github.xepozz.caddy.language.psi.CaddyTypes
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -13,30 +15,27 @@ import com.intellij.psi.PsiElement
 class CaddyAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
-            is CaddyDirectiveImpl -> {
-                val nameElement = element.getNameElement()
-                when {
-                    nameElement.text.startsWith("@") -> {
-                        holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                            .range(nameElement)
-                            .textAttributes(REFERENCE_DECLARATION_HIGHLIGHT)
-                            .create()
-                    }
+            is CaddyDirective -> {
+                val nameElement = element.node.findChildByType(CaddyTypes.IDENTIFIER)?.psi ?: return
+                holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+                    .range(nameElement)
+                    .textAttributes(IDENTIFIER_HIGHLIGHT)
+                    .create()
+            }
 
-                    else -> {
-                        holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                            .range(nameElement)
-                            .textAttributes(IDENTIFIER_HIGHLIGHT)
-                            .create()
-                    }
-                }
+            is CaddyMatcherDefinition -> {
+                val nameElement = element.node.findChildByType(CaddyTypes.MATCHER)?.psi ?: return
+                holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+                    .range(nameElement)
+                    .textAttributes(REFERENCE_DECLARATION_HIGHLIGHT)
+                    .create()
             }
 
             is CaddyArgument -> {
-                val text = element.simpleValue?.text ?: ""
-                if (text.startsWith("@")) {
+                val namedMatcher = element.namedMatcher
+                if (namedMatcher != null) {
                     holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element.simpleValue!!)
+                        .range(namedMatcher)
                         .textAttributes(REFERENCE_USAGE_HIGHLIGHT)
                         .create()
                 }

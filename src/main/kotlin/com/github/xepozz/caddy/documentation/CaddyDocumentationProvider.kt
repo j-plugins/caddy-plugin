@@ -4,35 +4,36 @@ import com.github.xepozz.caddy.DirectivesDictionary
 import com.github.xepozz.caddy.language.psi.CaddyDirective
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.markdown.utils.lang.CodeBlockHtmlSyntaxHighlighter
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 
 class CaddyDocumentationProvider : AbstractDocumentationProvider() {
     override fun getQuickNavigateInfo(element: PsiElement?, originalElement: PsiElement?): String? {
         if (element !is CaddyDirective) return null
 
-        val directiveName = element.name!!
+        val directiveName = element.name ?: return null
         val doc = DirectivesDictionary.getDocumentation(directiveName) ?: return null
 
-        return doc.description
+        return html(doc.description)
     }
 
     override fun generateDoc(element: PsiElement?, originalElement: PsiElement?): String? {
         if (element !is CaddyDirective) return null
 
-        val directiveName = element.name!!
+        val directiveName = element.name ?: return null
         val doc = DirectivesDictionary.getDocumentation(directiveName) ?: return null
 
         return buildString {
             append("<div class='definition'><pre>")
-            append(doc.name)
+            append(html(doc.name))
             append("</pre></div>")
 
             append("<div class='content'>")
-            append("<p>").append(doc.description).append("</p>")
+            append("<p>").append(html(doc.description)).append("</p>")
 
             if (doc.syntax != null) {
                 append("<h3>Syntax</h3>")
-                append("<pre>").append(doc.syntax).append("</pre>")
+                append("<pre>").append(html(doc.syntax)).append("</pre>")
             }
 
             if (doc.examples != null) {
@@ -49,4 +50,6 @@ class CaddyDocumentationProvider : AbstractDocumentationProvider() {
             append("</div>")
         }
     }
+
+    private fun html(text: String): String = StringUtil.escapeXmlEntities(text)
 }

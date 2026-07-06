@@ -36,8 +36,6 @@ class CaddyCompletionContributor : CompletionContributor() {
             context: ProcessingContext,
             result: CompletionResultSet
         ) {
-            val position = parameters.position.originalElement
-
             result.addAllElements(
                 DirectivesDictionary.directives.values
                     .map { directive ->
@@ -47,8 +45,9 @@ class CaddyCompletionContributor : CompletionContributor() {
                             .withTypeText(directive.description, true)
                             .withInsertHandler { context, _ ->
                                 val editor = context.editor
-                                editor.document.insertString(context.tailOffset, " ")
-                                editor.caretModel.moveToOffset(context.tailOffset)
+                                val tailOffset = context.tailOffset
+                                editor.document.insertString(tailOffset, " ")
+                                editor.caretModel.moveToOffset(tailOffset + 1)
                             }
                     }
             )

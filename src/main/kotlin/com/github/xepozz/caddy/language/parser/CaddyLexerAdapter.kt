@@ -1,12 +1,15 @@
 package com.github.xepozz.caddy.language.parser
 
-import com.github.xepozz.caddy.language.psi.CaddyTokenSets
-import com.github.xepozz.caddy.language.psi.CaddyTypes
 import com.intellij.lexer.FlexAdapter
-import com.intellij.lexer.MergingLexerAdapter
-import com.intellij.psi.tree.TokenSet
 
-class CaddyLexerAdapter : MergingLexerAdapter(
-    FlexAdapter(CaddyLexer(null)),
-    TokenSet.create(CaddyTypes.EOL, CaddyTypes.COMMENT)
-)
+class CaddyLexerAdapter private constructor(
+    private val caddyLexer: CaddyLexer
+) : FlexAdapter(caddyLexer) {
+
+    constructor() : this(CaddyLexer(null))
+
+    override fun start(buffer: CharSequence, startOffset: Int, endOffset: Int, initialState: Int) {
+        caddyLexer.resetCustomState(initialState)
+        super.start(buffer, startOffset, endOffset, initialState)
+    }
+}

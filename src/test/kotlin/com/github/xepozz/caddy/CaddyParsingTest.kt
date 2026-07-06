@@ -110,4 +110,23 @@ class CaddyParsingTest : BasePlatformTestCase() {
             """.trimIndent()
         )
     }
+
+    fun testCommentInsideBlockParses() {
+        assertNoErrors(
+            """
+            example.com {
+                # Application Root
+                root * /var/www/html
+            }
+            """.trimIndent()
+        )
+    }
+
+    fun testCrLfCommentInsideBlockParses() {
+        assertNoErrors("example.com {\r\n    # Application Root\r\n    root * /var/www/html\r\n}\r\n")
+    }
+
+    fun testUnmatchedClosingBraceDoesNotCrashLexer() {
+        parse("}")
+    }
 }

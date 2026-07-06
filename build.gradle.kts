@@ -3,7 +3,6 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java") // Java support
@@ -17,10 +16,14 @@ plugins {
 
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
+
+val generatedGrammarKitDir = layout.buildDirectory.dir("generated/sources/grammarKit/main")
+
 sourceSets {
     main {
         java {
-            srcDirs("src/main/java", "src/main/gen")
+            srcDirs("src/main/java")
+            srcDir(generatedGrammarKitDir)
         }
     }
 }
@@ -139,13 +142,17 @@ grammarKit {
 
 val generateCaddyLexer = tasks.register<GenerateLexerTask>("generateCaddyLexer") {
     sourceFile.set(file("src/main/kotlin/com/github/xepozz/caddy/language/parser/Caddy.flex"))
-    targetOutputDir.set(file("src/main/gen/com/github/xepozz/caddy/language/parser"))
-    purgeOldFiles.set(true)
+    targetOutputDir.set(generatedGrammarKitDir.map { it.dir("com/github/xepozz/caddy/language/parser") })
+    purgeOldFiles.set(false)
+}
+
+val deleteCaddyLexerBackup = tasks.register<Delete>("deleteCaddyLexerBackup") {
+    delete(generatedGrammarKitDir.map { it.file("com/github/xepozz/caddy/language/parser/CaddyLexer.java~") })
 }
 
 val generateCaddyParser = tasks.register<GenerateParserTask>("generateCaddyParser") {
     sourceFile.set(file("src/main/kotlin/com/github/xepozz/caddy/language/parser/Caddy.bnf"))
-    targetRootOutputDir.set(file("src/main/gen"))
+    targetRootOutputDir.set(generatedGrammarKitDir)
     pathToParser.set("com/github/xepozz/caddy/language/parser/CaddyParser.java")
     pathToPsiRoot.set("com/github/xepozz/caddy/language/psi")
     purgeOldFiles.set(true)
@@ -167,6 +174,10 @@ tasks {
     compileJava {
         dependsOn(generateCaddyLexer, generateCaddyParser)
     }
+}
+
+generateCaddyLexer {
+    finalizedBy(deleteCaddyLexerBackup)
 }
 
 intellijPlatformTesting {

@@ -25,7 +25,7 @@ import java.util.Stack;
 // Common macros
 WHITESPACE = [ \t\f]
 NEWLINE = \r\n|\r|\n
-COMMENT = "#"[^\n]*
+COMMENT = "#"[^\r\n]*
 
 // Identifier patterns
 IDENTIFIER = [a-zA-Z][a-zA-Z0-9_\-]*
@@ -63,12 +63,25 @@ private Stack<Integer> stack = new Stack<>();
 private String heredocMarker = null;
 private Integer heredocIndent = null;
 
+public void resetCustomState(int initialState) {
+  stack.clear();
+  heredocMarker = null;
+  heredocIndent = null;
+  if (initialState == IN_BLOCK || initialState == IN_HEREDOC) {
+    stack.push(YYINITIAL);
+  }
+}
+
 public void yypushState(int newState) {
   stack.push(yystate());
   yybegin(newState);
 }
 
 public void yypopState() {
+  if (stack.empty()) {
+    yybegin(YYINITIAL);
+    return;
+  }
   yybegin(stack.pop());
 }
 
